@@ -1,4 +1,4 @@
-# Prediksi Harga Rumah
+# 🏡 Prediksi Harga Rumah
 
 ---
 
@@ -6,7 +6,7 @@ Aplikasi web berbasis Flask untuk mengestimasi harga rumah menggunakan lima masu
 
 ---
 
-## Teknologi yang Dipakai
+## 👨‍💻 Teknologi yang Dipakai
 - **Python 3.10+**
 - **Flask**
 - **NumPy, Pandas, Joblib**
@@ -15,7 +15,7 @@ Aplikasi web berbasis Flask untuk mengestimasi harga rumah menggunakan lima masu
 
 ---
 
-## Fitur
+## 📌 Fitur
 - **Form input properti**: Luas Bangunan (m²), Luas Tanah (m²), Jumlah Kamar Tidur, Jumlah Kamar Mandi, Kapasitas Mobil di Garasi.
 - **Input numerik**: field angka (tipe number), **tidak bisa** diisi huruf/simbol.
 - **Validasi nilai**: angka **negatif ditolak** untuk semua isian.
@@ -27,7 +27,7 @@ Aplikasi web berbasis Flask untuk mengestimasi harga rumah menggunakan lima masu
 
 ---
 
-## Dataset
+## 📊 Dataset
 - **Sumber**: Kaggle – *Daftar Harga Rumah* oleh **wisnu anggara**  
   Link: `https://www.kaggle.com/datasets/wisnuanggara/daftar-harga-rumah/data`
 - **Jumlah data**: **1.010 baris**
@@ -41,7 +41,7 @@ Aplikasi web berbasis Flask untuk mengestimasi harga rumah menggunakan lima masu
 
 ---
 
-## Struktur Direktori
+## 📝 Struktur Direktori
   ```
   house-pricing-prediction/
   │── model/
@@ -59,7 +59,7 @@ Aplikasi web berbasis Flask untuk mengestimasi harga rumah menggunakan lima masu
 
 ---
 
-## Cara Menjalankan
+## 🕵️ Cara Menjalankan
 1. Clone repository:
 
     ```bash
