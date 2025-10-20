@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediksi Harga Rumah</title>
+
+  <!-- Font Geist -->
+  <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/geist" />
+  <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/geist-mono" />
+
+  <!-- Icon -->
+  <script src="https://kit.fontawesome.com/a2d5dfd6b6.js" crossorigin="anonymous"></script>
+
+  <!-- Material Symbols (ikon rumah 'cottage') -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0&icon_names=cottage" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <i class="fa-regular fa-house"></i>
+      <span>Prediksi Harga Rumah</span>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-icon">
+      <i class="fa-regular fa-house"></i>
+      <span class="material-symbols-outlined" style="font-size:80px; line-height:1; display:inline-block; color:#000000; margin-bottom:0px;">cottage</span>
+    </div>
+    <h1>Prediksi Harga Rumah</h1>
+    <p>Dapatkan estimasi harga rumah Anda secara instan dengan memasukkan detail properti.</p>
+  </section>
+
+  <!-- FORM PREDIKSI -->
+  <div class="container">
+    <div class="form-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, msg in messages %}
+            <div class="flash {{ category }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="form-header">
+        <div class="">
+          <i class="fa-solid fa-building"></i>
+        </div>
+        <div class="form-header-text">
+          <h2>Detail Rumah</h2>
+          <p>Masukkan informasi rumah Anda untuk mendapatkan estimasi harga</p>
+        </div>
+      </div>
+
+      <form id="formPrediksi" action="/predict" method="POST" novalidate>
+        <label for="lb">
+          <span class="material-symbols-outlined ms-ic">apartment</span>
+          Luas Bangunan (m²)
+        </label>
+        <input type="number" step="0.01" id="lb" name="lb" placeholder="Masukkan luas bangunan" min="0" required>
+        <div class="error-msg" id="error-lb"></div>
+
+        <label for="lt">
+          <span class="material-symbols-outlined ms-ic">universal_local</span>
+          Luas Tanah (m²)
+        </label>
+        <input type="number" step="0.01" id="lt" name="lt" placeholder="Masukkan luas tanah" min="0" required>
+        <div class="error-msg" id="error-lt"></div>
+
+        <!-- Jumlah Kamar Tidur -->
+        <label>
+          <span class="material-symbols-outlined ms-ic">bed</span>
+          Jumlah Kamar Tidur
+        </label>
+        <div class="number-options" id="kt-options">
+          {% for i in range(0, 11) %}
+            <input type="radio" id="kt{{ i }}" name="kt" value="{{ i }}" required>
+            <label for="kt{{ i }}">{{ i }}</label>
+          {% endfor %}
+          <input type="radio" id="kt10plus" name="kt" value="10+">
+          <label for="kt10plus">10+</label>
+        </div>
+        <div class="extra-input" id="extra-kt">
+          <input type="number" id="kt_more" name="kt_more" placeholder="Masukkan jumlah kamar tidur" min="0">
+        </div>
+        <div class="error-msg" id="error-kt"></div>
+
+        <!-- Jumlah Kamar Mandi -->
+        <label>
+          <span class="material-symbols-outlined ms-ic">bathtub</span>
+          Jumlah Kamar Mandi
+        </label>
+        <div class="number-options" id="km-options">
+          {% for i in range(0, 11) %}
+            <input type="radio" id="km{{ i }}" name="km" value="{{ i }}" required>
+            <label for="km{{ i }}">{{ i }}</label>
+          {% endfor %}
+          <input type="radio" id="km10plus" name="km" value="10+">
+          <label for="km10plus">10+</label>
+        </div>
+        <div class="extra-input" id="extra-km">
+          <input type="number" id="km_more" name="km_more" placeholder="Masukkan jumlah kamar mandi" min="0">
+        </div>
+        <div class="error-msg" id="error-km"></div>
+
+        <!-- Kapasitas Garasi -->
+        <label>
+          <span class="material-symbols-outlined ms-ic">directions_car</span>
+          Kapasitas Mobil Dalam Garasi
+        </label>
+        <div class="number-options" id="grs-options">
+          {% for i in range(0, 11) %}
+            <input type="radio" id="grs{{ i }}" name="grs" value="{{ i }}" required>
+            <label for="grs{{ i }}">{{ i }}</label>
+          {% endfor %}
+          <input type="radio" id="grs10plus" name="grs" value="10+">
+          <label for="grs10plus">10+</label>
+        </div>
+        <div class="extra-input" id="extra-grs">
+          <input type="number" id="grs_more" name="grs_more" placeholder="Masukkan jumlah garasi" min="0">
+        </div>
+        <div class="error-msg" id="error-grs"></div>
+
+        <button type="submit"><i class="fa-solid fa-calculator"></i> Prediksi Harga</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    document.querySelectorAll('input[type="radio"][value="10+"]').forEach(radio=>{
+      radio.addEventListener('change', function(){
+        const name = this.name;
+        const extraDiv = document.getElementById('extra-'+name);
+        const extraInput = document.getElementById(name+'_more');
+        extraDiv.style.display = 'block';
+        extraInput.focus();
+      });
+    });
+
+    document.querySelectorAll('input[type="radio"]:not([value="10+"])').forEach(radio=>{
+      radio.addEventListener('change', function(){
+        const extraDiv = document.getElementById('extra-'+this.name);
+        if(extraDiv) extraDiv.style.display='none';
+      });
+    });
+
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+      input.addEventListener('input', function() {
+        if (this.value < 0) this.value = 0;
+      });
+    });
+
+      function setRadio(name, val){
+      const radios = document.querySelectorAll(`input[name="${name}"]`);
+      radios.forEach(r=>{ r.checked = (r.value == val); });
+    }
+
+  </script>
+
+  <script>
+    function showExtraOnLoad() {
+      ['kt','km','grs'].forEach(name => {
+        const radio10plus = document.getElementById(name+'10plus');
+        const extraDiv = document.getElementById('extra-'+name);
+        const extraInput = document.getElementById(name+'_more');
+        const val = extraInput.value;
+
+        if(radio10plus.checked || (val && parseInt(val) > 10)){
+          radio10plus.checked = true;
+          extraDiv.style.display = 'block';
+        } else {
+          extraDiv.style.display = 'none';
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', showExtraOnLoad);
+  </script>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  {% if hasil %}
+  <script>
+    // ADDED: Prefill form dari server (nilai terakhir yang dipakai menghitung)
+    function prefillFormFromServer(){
+      const sv = {
+        lb: '{{ form.lb|default("") }}',
+        lt: '{{ form.lt|default("") }}',
+        kt: '{{ form.kt|default("") }}',
+        km: '{{ form.km|default("") }}',
+        grs:'{{ form.grs|default("") }}',
+        kt_more: '{{ form.kt_more|default("") }}',
+        km_more: '{{ form.km_more|default("") }}',
+        grs_more:'{{ form.grs_more|default("") }}'
+      };
+
+      if(sv.lb) document.getElementById('lb').value = sv.lb;
+      if(sv.lt) document.getElementById('lt').value = sv.lt;
+
+      if(sv.kt) setRadio('kt', sv.kt);
+      if(sv.km) setRadio('km', sv.km);
+      if(sv.grs) setRadio('grs', sv.grs);
+
+      if(document.getElementById('kt_more') && sv.kt_more) document.getElementById('kt_more').value = sv.kt_more;
+      if(document.getElementById('km_more') && sv.km_more) document.getElementById('km_more').value = sv.km_more;
+      if(document.getElementById('grs_more') && sv.grs_more) document.getElementById('grs_more').value = sv.grs_more;
+
+      showExtraOnLoad();
+    }
+
+    // ADDED: snapshot nilai form saat ini
+    function snapshotForm(){
+      const snap = {
+        lb: document.getElementById('lb').value || '',
+        lt: document.getElementById('lt').value || '',
+        kt: (document.querySelector('input[name="kt"]:checked')||{}).value || '',
+        km: (document.querySelector('input[name="km"]:checked')||{}).value || '',
+        grs:(document.querySelector('input[name="grs"]:checked')||{}).value || '',
+        kt_more: document.getElementById('kt_more')?.value || '',
+        km_more: document.getElementById('km_more')?.value || '',
+        grs_more:document.getElementById('grs_more')?.value || ''
+      };
+      return snap;
+    }
+
+    // ADDED: kembalikan nilai form dari snapshot
+    function restoreForm(snap){
+      document.getElementById('lb').value = snap.lb;
+      document.getElementById('lt').value = snap.lt;
+
+      if(snap.kt) setRadio('kt', snap.kt);
+      if(snap.km) setRadio('km', snap.km);
+      if(snap.grs) setRadio('grs', snap.grs);
+
+      if(document.getElementById('kt_more')) document.getElementById('kt_more').value = snap.kt_more;
+      if(document.getElementById('km_more')) document.getElementById('km_more').value = snap.km_more;
+      if(document.getElementById('grs_more')) document.getElementById('grs_more').value = snap.grs_more;
+
+      showExtraOnLoad();
+    }
+
+    // ADDED: simpan extra values seperti sudah ada
+    function saveExtraValues() {
+      ['kt','km','grs'].forEach(name=>{
+        const input = document.getElementById(name+'_more');
+        if(input && input.value) input.dataset.oldValue = input.value;
+      });
+    }
+
+    function restoreExtraValues() {
+      ['kt','km','grs'].forEach(name=>{
+        const radio = document.getElementById(name+'10plus');
+        const div = document.getElementById('extra-'+name);
+        const input = document.getElementById(name+'_more');
+        if(input && input.dataset.oldValue && input.dataset.oldValue !== ''){
+          if(radio) radio.checked = true;
+          input.value = input.dataset.oldValue;
+        }
+        if(div) div.style.display='block';
+      });
+    }
+
+    // PREFILL dari server sebelum buka popup
+    prefillFormFromServer(); // ADDED
+    saveExtraValues();
+
+    // Simpan snapshot sebelum popup (untuk tombol Edit)
+    const _snapshotBeforePopup = snapshotForm(); // ADDED
+
+    Swal.fire({
+      title: `
+        <span class="material-symbols-outlined" style="font-size:80px; line-height:1; display:inline-block; color:#000000; margin-bottom:16px;">cottage</span>
+        <div style="font-size:16px; color:#111111; margin-bottom:-32px;">Harga Estimasi Rumah Anda</div>
+        <div style="font-size:28px; color:#000000; margin-bottom:-32px;"><b>{{ hasil }}</b></div>
+      `,
+      html: `
+        <div style="font-size:12px; text-align:center; margin-top:0px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+            <!-- Perubahan di bawah: tambahin ikon di dalam setiap pill -->
+            <span style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:#eeeeee; border-radius:25px; font-weight:450; color:#111111;">
+              <span class="material-symbols-outlined ms-ic" style="font-size:16px;">apartment</span>
+              {{ form.lb }} m²
+            </span>
+            <span style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:#eeeeee; border-radius:20px; font-weight:450; color:#111111;">
+              <span class="material-symbols-outlined ms-ic" style="font-size:16px;">universal_local</span>
+              {{ form.lt }} m²
+            </span>
+            <span style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:#eeeeee; border-radius:20px; font-weight:450; color:#111111;">
+              <span class="material-symbols-outlined ms-ic" style="font-size:16px;">bed</span>
+              {{ (form.kt_more if form.kt == '10+' and form.kt_more) or form.kt }} Kamar
+            </span>
+            <span style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:#eeeeee; border-radius:20px; font-weight:450; color:#111111;">
+              <span class="material-symbols-outlined ms-ic" style="font-size:16px;">bathtub</span>
+              {{ (form.km_more if form.km == '10+' and form.km_more) or form.km }} Kamar Mandi
+            </span>
+            <span style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:#eeeeee; border-radius:20px; font-weight:450; color:#111111;">
+              <span class="material-symbols-outlined ms-ic" style="font-size:16px;">directions_car</span>
+              {{ (form.grs_more if form.grs == '10+' and form.grs_more) or form.grs }} Mobil
+            </span>
+          </div>
+        </div>
+      `,
+      width: 500,
+      padding: '1.5rem',
+      showCancelButton: true,
+      confirmButtonText: 'Edit',
+      cancelButtonText: 'Tutup',
+      confirmButtonColor: '#000000',
+      cancelButtonColor: '#000000',
+      background: '#ffffff',
+      color: '#000000',
+      customClass: {
+        popup: 'rounded-xl shadow-lg',
+        actions: 'swal2-actions-custom',
+        confirmButton: 'swal2-confirm-custom',
+        cancelButton: 'swal2-cancel-custom'
+      }
+    }).then((result) => {
+      const form = document.getElementById('formPrediksi');
+      if (result.isConfirmed) {
+        Swal.close();
+        restoreForm(_snapshotBeforePopup);
+        restoreExtraValues();
+        showExtraOnLoad();
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        const form = document.getElementById('formPrediksi');
+        form.reset();
+
+        document.querySelectorAll('.number-options input[type="radio"]').forEach(radio => radio.checked = false);
+
+        document.querySelectorAll('.extra-input').forEach(e => {
+          e.style.display = 'none';
+          const extraInput = e.querySelector('input[type="number"]');
+          if (extraInput) {
+            extraInput.value = '';
+            extraInput.dataset.oldValue = '';
+          }
+        });
+
+        document.getElementById('lb').value = '';
+        document.getElementById('lt').value = '';
+      }
+    });
+  </script>
+  {% endif %}
+
+  <script>
+    document.getElementById('formPrediksi').addEventListener('submit', function(e) {
+      let valid = true;
+
+      // Hapus pesan error lama
+      document.querySelectorAll('.error-msg').forEach(el => {
+        el.style.display = 'none';
+        el.textContent = '';
+      });
+      document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+
+      // Validasi LB dan LT
+      const lb = document.getElementById('lb');
+      const lt = document.getElementById('lt');
+      if (!lb.value || lb.value.trim() === '') {
+        const err = document.getElementById('error-lb');
+        lb.classList.add('input-error');
+        err.textContent = 'Luas bangunan tidak boleh kosong.';
+        err.style.display = 'block';
+        valid = false;
+      }
+      if (!lt.value || lt.value.trim() === '') {
+        const err = document.getElementById('error-lt');
+        lt.classList.add('input-error');
+        err.textContent = 'Luas tanah tidak boleh kosong.';
+        err.style.display = 'block';
+        valid = false;
+      }
+
+      // Validasi KT, KM, GRS
+      const fields = [
+        { name: 'kt', label: 'jumlah kamar tidur' },
+        { name: 'km', label: 'jumlah kamar mandi' },
+        { name: 'grs', label: 'jumlah kapasitas mobil dalam garasi' }
+      ];
+
+      fields.forEach(f => {
+        const selected = document.querySelector(`input[name="${f.name}"]:checked`);
+        const extraInput = document.getElementById(`${f.name}_more`);
+        const errorEl = document.getElementById(`error-${f.name}`);
+
+        if (!selected) {
+          errorEl.textContent = `Silakan pilih ${f.label}.`;
+          errorEl.style.display = 'block';
+          valid = false;
+        } 
+        else if (selected.value === '10+' && (!extraInput.value || extraInput.value.trim() === '')) {
+          extraInput.classList.add('input-error');
+          errorEl.textContent = `${f.label} lebih dari 10 harus diisi jumlah pastinya.`;
+          errorEl.style.display = 'block';
+          valid = false;
+        }
+      });
+
+      if (!valid) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  </script>
+
+  <style>
+    .swal2-actions-custom {
+      display: flex !important;
+      justify-content: space-between !important;
+      gap: 10px;
+      font-size: 13px !important;
+    }
+    .swal2-confirm-custom, .swal2-cancel-custom {
+      width: 40%;
+      font-weight: 600;
+      border-radius: 8px;
+      font-size: 13px !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</body>
+</html>
